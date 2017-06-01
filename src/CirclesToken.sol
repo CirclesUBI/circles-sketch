@@ -4,13 +4,13 @@ import "ds-token/token.sol";
 
 contract CirclesToken is DSToken("") {
 
-    address public recipient;
+    address public person;
 
     uint public lastTouched;
     uint public factor = 1736111111111111; // ~1050 tokens per week
 
-    function CirclesToken(address recipient_) {
-        recipient = recipient;
+    function CirclesToken(address person_) {
+        person = person_;
         lastTouched = now;
     }
 
@@ -23,7 +23,7 @@ contract CirclesToken is DSToken("") {
     function update() {
         var gift = look();
         this.mint(cast(gift));
-        this.push(recipient, cast(gift));
+        this.push(person, cast(gift));
         lastTouched = now;
     }
 
@@ -66,7 +66,7 @@ contract CirclesToken is DSToken("") {
     function balanceOf(address src) constant returns (uint256) {
         var balance = super.balanceOf(src);
 
-        if (src == recipient) {
+        if (src == person) {
             balance = add(balance, look());
         }
 
