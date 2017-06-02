@@ -13,8 +13,8 @@ contract TokenManager is DSMath {
 
     mapping (address => mapping (address => bool)) public edges;
 
-    mapping (address => DSToken) groupTokens;
-    mapping (address => GroupRules) groupUsers;
+    mapping (address => DSToken) public groupTokens;
+    mapping (address => GroupRules) public groupUsers;
 
     function join() {
         assert(address(circlesTokens[msg.sender]) == 0);

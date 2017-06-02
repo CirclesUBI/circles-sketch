@@ -11,11 +11,15 @@ contract CirclesToken is DSToken("") {
 
     function CirclesToken(address person_) {
         person = person_;
-        lastTouched = now;
+        lastTouched = time();
+    }
+
+    function time() returns (uint) {
+        return block.timestamp;
     }
 
     function look() returns (uint) {
-        var period = now - lastTouched;
+        var period = time() - lastTouched;
         return factor * period;
     }
 
@@ -24,7 +28,7 @@ contract CirclesToken is DSToken("") {
         var gift = look();
         this.mint(cast(gift));
         this.push(person, cast(gift));
-        lastTouched = now;
+        lastTouched = time();
     }
 
     function transferFrom(
@@ -49,7 +53,9 @@ contract CirclesToken is DSToken("") {
     }
 
     function transfer(address dst, uint wad) returns (bool) {
-        update();
+        if (msg.sender != address(this)) {
+            update();
+        }
         return super.transfer(dst, wad);
     }
 
