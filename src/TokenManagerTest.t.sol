@@ -93,6 +93,10 @@ contract TokenManagerTest is DSTest {
         user2.doTrust(user1, true);
     }
 
+    // Standard happy case
+    // A <---> B <---> C <---> D
+    // A swaps A tokens with B for B tokens, B tokens with C for C tokens, and pays D in C tokens 
+
     function testTransferThrough() {
         user1.doJoin();
         user2.doJoin();
@@ -133,6 +137,10 @@ contract TokenManagerTest is DSTest {
         assertEq(user4.token().balanceOf(user4), 100 ether);   
     }
 
+    // Transitive case
+    // A <---> B <---> C <---> D
+    // A swaps B tokens with C for C tokens, and pays D in C tokens
+
     function testTransferThroughOthersTokens() {
         user1.doJoin();
         user2.doJoin();
@@ -142,7 +150,6 @@ contract TokenManagerTest is DSTest {
         circles.mintFor(user2.token(), user1, 100 ether);
         circles.mintFor(user3.token(), user3, 100 ether);
 
-        doubleEdge(user1, user2);
         doubleEdge(user2, user3);
         doubleEdge(user3, user4);
 
@@ -164,10 +171,15 @@ contract TokenManagerTest is DSTest {
         assertEq(user3.token().balanceOf(user4), 100 ether);
     }
 
+    // Forming a group
+
     function testGroup() {
         circles.group(rules, "DTW", "Detroit Coin");
         assert(address(circles.groupTokens(address(rules))) != 0);
     }
+
+    // Standard happy case
+    // A converts A tokens into DTW and loses some to a tax
 
     function testConvert() {
         circles.group(rules, "DTW", "Detroit Coin");

@@ -16,6 +16,7 @@ contract TokenManager is DSMath {
     mapping (address => DSToken) public groupTokens;
     mapping (address => GroupRules) public groupUsers;
 
+    // No exit allowed. Once you create a personal token, you're in for good.
     function join() {
         assert(address(circlesTokens[msg.sender]) == 0);
         var token = new CirclesToken(msg.sender);
@@ -23,12 +24,16 @@ contract TokenManager is DSMath {
         circlesUsers[address(token)] = msg.sender;
     }
 
+    // Trust does not have to be reciprocated. 
+    // (e.g. I can trust you but you don't have to trust me)
     function trust(address node, bool yes) {
         assert(address(circlesTokens[node]) != 0);
         assert(address(circlesTokens[msg.sender]) != 0);
         edges[msg.sender][node] = yes;
     }
 
+    // Starting with msg.sender as node 0, 
+    // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] nodes, address[] tokens, uint wad) {
         assert(nodes.length == tokens.length);
         var length = nodes.length;
@@ -40,18 +45,18 @@ contract TokenManager is DSMath {
             var node = nodes[x];
             var token = CirclesToken(tokens[x]);
 
+            var person = token.person();
+            assert(edges[node][person]); // node trusts what they're about to receive
+
             token.transferFrom(msg.sender, node, wad);
 
             if (x + 1 < length) {
-                var person = token.person();
-                assert(edges[node][person]);
 
                 var nextToken = CirclesToken(tokens[x+1]);
                 nextToken.transferFrom(node, msg.sender, wad);
             }
         }
     }
-
 
     function group(GroupRules rules, bytes32 symbol, bytes32 name) {
         var token = new DSToken(symbol);
@@ -60,6 +65,8 @@ contract TokenManager is DSMath {
         groupUsers[address(token)] = rules;
     }
 
+    // Only the group admin address can change the rules. 
+    // This address should be controlled by everyone in the group.
     function newRules(GroupRules oldRules, GroupRules newRules) {
         assert(address(groupTokens[address(oldRules)]) != 0);
         assert(msg.sender == oldRules.admin());
@@ -72,6 +79,9 @@ contract TokenManager is DSMath {
         delete groupTokens[address(oldRules)];
     }
 
+    // One way conversion from personal tokens into group tokens.
+    // Anyone can convert any personal tokens they have.
+    // Some personal tokens can be taken as a tax depending on the rules of the group.
     function convert(CirclesToken src, DSToken dst, uint wad) {
         var rules = groupUsers[address(dst)];
 
