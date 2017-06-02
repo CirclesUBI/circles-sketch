@@ -14,7 +14,7 @@ There are three components:
 
 ### CirclesToken
 
-This is derived from the [DSToken](https://dappsys.readthedocs.io/en/latest/ds_token.html) type which allows for access-controlled `mint` and `burn` actions for increasing and decreasing the supply. The `mint` action is called by the token itself whenever a non-constant function is called (e.g. `transfer`). New tokens are created and awarded to the creator of the contract based on how many seconds have elapsed since it was last poked.
+This is derived from the [DSToken](https://dappsys.readthedocs.io/en/latest/ds_token.html) type which allows for access-controlled `mint` and `burn` actions for increasing and decreasing the supply. The `mint` action is called by the token itself whenever a non-constant function is called (e.g. `transfer`). New tokens are created and awarded to the creator of the contract based on how many seconds have elapsed since it was last poked. This value is virtualized, meaning it also is derived and accounted for in constant functions (i.e. `balanceOf` and `totalSupply`) even though they don't actually call the `mint` function.
 
 ### TokenManager
 
@@ -35,3 +35,7 @@ I put it there because I think the Group needs an opportunity to somehow control
 *Should a user be able to convert another user's CircleTokens?*
 
 I chose to allow this because a user can't control whether a node they trust takes all their specific tokens. It makes sense that they should be able to use what they have to convert, but this means the group rules will have to take the applicant and their token type into account when deciding `canConvert`.
+
+*Why are the type and variable names so weird?*
+
+I wrote this quickly. We should definitely use clearer names in the next iteration.
