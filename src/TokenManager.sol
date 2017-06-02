@@ -89,6 +89,7 @@ contract TokenManager is DSMath {
         assert(address(rules) != 0);
         assert(rules.canConvert(src, msg.sender, wad));
 
+        // see https://dappsys.readthedocs.io/en/latest/ds_math.html for wmul docs
         var gift = wmul(rules.convertRate(src, msg.sender, wad), cast(wad));
         var tax = wmul(rules.taxRate(src, msg.sender, wad), cast(wad));
         var total = hadd(gift, tax);
