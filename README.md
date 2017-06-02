@@ -30,7 +30,7 @@ The group rules is an abstract interface that defines `canConvert`, `convertRate
 
 *Does the `taxRate` + `vault` concept belong in GroupRules?* 
 
-I put it there because I think the Group needs an opportunity to somehow control the global state, without having total ownership over the token. Is this the right tradeoff? Giving the group total ownership over the token means they could change the `authority` member, potentially removing the TokenManager's ability to `mint` group tokens when converting CirclesTokens.
+I put it there because I think the Group needs an opportunity to somehow control the global state of their currency, without having total ownership over the token. Is this the right tradeoff? Giving the group total ownership over the token means they could change the `authority` member, potentially removing the TokenManager's ability to `mint` group tokens when converting CirclesTokens.
 
 *Should a user be able to convert another user's CircleTokens?*
 
