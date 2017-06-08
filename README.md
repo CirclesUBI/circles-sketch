@@ -35,7 +35,3 @@ I put it there because I think the Group needs an opportunity to somehow control
 *Should a user be able to convert another user's CircleTokens?*
 
 I chose to allow this because a user can't control whether a node they trust takes all their specific tokens. It makes sense that they should be able to use what they have to convert, but this means the group rules will have to take the applicant and their token type into account when deciding `canConvert`.
-
-*Why are the type and variable names so weird?*
-
-I wrote this quickly. We should definitely use clearer names in the next iteration.
