@@ -7,13 +7,22 @@ import "ds-math/math.sol";
 
 contract CirclesHub is DSMath {
 
+    uint constant LIMIT_EPOCH = 3600;
+
+    struct EdgeWeight {
+        uint limit;
+        uint value;
+        uint lastTouched;
+    }
+
     mapping (address => CirclesToken) public userToToken;
     mapping (address => address) public tokenToUser;
 
     mapping (address => bool) validators;
 
-    mapping (address => mapping (address => bool)) public edges;
-    
+    mapping (address => mapping (address => EdgeWeight)) public edges;
+
+    function time() returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
     function join() {
@@ -25,13 +34,14 @@ contract CirclesHub is DSMath {
 
     function register() {
         validators[msg.sender] = true;
-    }2
+    }
 
     // Trust does not have to be reciprocated. 
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address node, bool yes) {
+    function trust(address node, bool yes, uint limit) {
         assert(address(tokenToUser[node]) != 0 || validators[node]);
-        edges[msg.sender][node] = yes;
+        edges[msg.sender][node] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
+
     }
 
     // Starting with msg.sender as node 0, 
@@ -49,13 +59,24 @@ contract CirclesHub is DSMath {
 
             var token = CirclesToken(tokens[currentToken]);
 
+            address nextNode;
+
             if (currentValidator != 0) {
-                assert(edges[node][currentValidator]);
+                nextNode = currentValidator;
                 currentValidator = 0;
             }
             else {
-                assert(edges[node][token]); // node trusts the current token of the mediated transaction
+                nextNode = token;
             }
+
+            assert(edges[node][nextNode].lastTouched != 0);
+
+            edges[node][nextNode].value = time() - edges[node][nextNode].lastTouched < LIMIT_EPOCH ? 
+                edges[node][nextNode].value + wad : 0;
+
+            edges[node][nextNode].lastTouched = time();
+            
+            assert(edges[node][nextNode].limit >= edges[node][nextNode].value);
 
             if (validators[node]) {
                 currentValidator = node;
