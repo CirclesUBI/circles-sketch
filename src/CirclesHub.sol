@@ -22,9 +22,9 @@ contract CirclesHub is DSMath {
 
     // Trust does not have to be reciprocated. 
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address node, bool yes) {
-        assert(address(userToToken[node]) != 0);
-        edges[msg.sender][node] = yes;
+    function trust(address token, bool yes) {
+        assert(address(tokenToUser[token]) != 0);
+        edges[msg.sender][token] = yes;
     }
 
     // Starting with msg.sender as node 0, 
@@ -39,8 +39,7 @@ contract CirclesHub is DSMath {
             var node = nodes[x];
             var token = CirclesToken(tokens[x]);
 
-            var person = token.person();
-            assert(edges[node][person]); // node trusts what they're about to receive
+            assert(edges[node][token]); // node trusts what they're about to receive
 
             token.transferFrom(msg.sender, node, wad);
 

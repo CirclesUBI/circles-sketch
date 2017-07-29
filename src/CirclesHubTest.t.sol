@@ -34,8 +34,8 @@ contract CirclesUser {
         circles.transferThrough(nodes, tokens, wad);
     }
 
-    function doTrust(address node, bool yes) {
-        circles.trust(node, yes);
+    function doTrust(address token, bool yes) {
+        circles.trust(token, yes);
     }
 }
 
@@ -57,8 +57,8 @@ contract CirclesHubTest is DSTest {
     }
 
     function doubleEdge(CirclesUser user1, CirclesUser user2) {
-        user1.doTrust(user2, true);
-        user2.doTrust(user1, true);
+        user1.doTrust(user2.token(), true);
+        user2.doTrust(user1.token(), true);
     }
 
     // Standard happy case
