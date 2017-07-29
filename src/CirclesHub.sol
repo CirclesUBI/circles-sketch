@@ -59,24 +59,24 @@ contract CirclesHub is DSMath {
 
             var token = CirclesToken(tokens[currentToken]);
 
-            address nextNode;
+            address prevNode;
 
             if (currentValidator != 0) {
-                nextNode = currentValidator;
+                prevNode = currentValidator;
                 currentValidator = 0;
             }
             else {
-                nextNode = token;
+                prevNode = token;
             }
+            // edges[node][prevNode] 
+            assert(edges[node][prevNode].lastTouched != 0);
 
-            assert(edges[node][nextNode].lastTouched != 0);
+            edges[node][prevNode].value = time() - edges[node][prevNode].lastTouched < LIMIT_EPOCH ? 
+                edges[node][prevNode].value + wad : wad;
 
-            edges[node][nextNode].value = time() - edges[node][nextNode].lastTouched < LIMIT_EPOCH ? 
-                edges[node][nextNode].value + wad : 0;
-
-            edges[node][nextNode].lastTouched = time();
+            edges[node][prevNode].lastTouched = time();
             
-            assert(edges[node][nextNode].limit >= edges[node][nextNode].value);
+            assert(edges[node][prevNode].limit >= edges[node][prevNode].value);
 
             if (isValidator[node]) {
                 currentValidator = node;
