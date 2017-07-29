@@ -10,7 +10,10 @@ contract CirclesHub is DSMath {
     mapping (address => CirclesToken) public userToToken;
     mapping (address => address) public tokenToUser;
 
+    mapping (address => bool) validators;
+
     mapping (address => mapping (address => bool)) public edges;
+    
 
     // No exit allowed. Once you create a personal token, you're in for good.
     function join() {
@@ -20,34 +23,54 @@ contract CirclesHub is DSMath {
         tokenToUser[address(token)] = msg.sender;
     }
 
+    function register() {
+        validators[msg.sender] = true;
+    }2
+
     // Trust does not have to be reciprocated. 
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address token, bool yes) {
-        assert(address(tokenToUser[token]) != 0);
-        edges[msg.sender][token] = yes;
+    function trust(address node, bool yes) {
+        assert(address(tokenToUser[node]) != 0 || validators[node]);
+        edges[msg.sender][node] = yes;
     }
 
     // Starting with msg.sender as node 0, 
     // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] nodes, address[] tokens, uint wad) {
-        var length = nodes.length;
+        var length = tokens.length;
+
+        uint currentToken = 0;
+
+        address currentValidator;
 
         for (var x = 0; x < length; x++) {
             
-            assert(tokenToUser[tokens[x]] != 0);
-            
             var node = nodes[x];
-            var token = CirclesToken(tokens[x]);
 
-            assert(edges[node][token]); // node trusts what they're about to receive
+            var token = CirclesToken(tokens[currentToken]);
 
-            token.transferFrom(msg.sender, node, wad);
-
-            if (x + 1 < length) {
-
-                var nextToken = CirclesToken(tokens[x+1]);
-                nextToken.transferFrom(node, msg.sender, wad);
+            if (currentValidator != 0) {
+                assert(edges[node][currentValidator]);
+                currentValidator = 0;
             }
+            else {
+                assert(edges[node][token]); // node trusts the current token of the mediated transaction
+            }
+
+            if (validators[node]) {
+                currentValidator = node;
+            } else {
+                currentToken++;
+
+                token.transferFrom(msg.sender, node, wad);
+
+                if (x + 1 < length) {
+
+                    var nextToken = CirclesToken(tokens[currentToken]);
+                    nextToken.transferFrom(node, msg.sender, wad);
+                }
+            }
+            
         }
     }
 
