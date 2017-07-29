@@ -18,7 +18,7 @@ contract CirclesHub is DSMath {
     mapping (address => CirclesToken) public userToToken;
     mapping (address => address) public tokenToUser;
 
-    mapping (address => bool) validators;
+    mapping (address => bool) isValidator;
 
     mapping (address => mapping (address => EdgeWeight)) public edges;
 
@@ -33,13 +33,13 @@ contract CirclesHub is DSMath {
     }
 
     function register() {
-        validators[msg.sender] = true;
+        isValidator[msg.sender] = true;
     }
 
     // Trust does not have to be reciprocated. 
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address node, bool yes, uint limit) {
-        assert(address(tokenToUser[node]) != 0 || validators[node]);
+        assert(address(tokenToUser[node]) != 0 || isValidator[node]);
         edges[msg.sender][node] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
 
     }
@@ -78,7 +78,7 @@ contract CirclesHub is DSMath {
             
             assert(edges[node][nextNode].limit >= edges[node][nextNode].value);
 
-            if (validators[node]) {
+            if (isValidator[node]) {
                 currentValidator = node;
             } else {
                 currentToken++;
