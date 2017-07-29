@@ -23,7 +23,7 @@ contract CirclesUser {
 
     function doJoin() {
         circles.join();
-        token = circles.circlesTokens(this);
+        token = circles.userToToken(this);
     }
 
     function doTransfer(address dst, uint wad) {
