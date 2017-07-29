@@ -44,22 +44,21 @@ contract CirclesHub is DSMath {
 
     }
 
-    // Starting with msg.sender as node 0, 
+    // Starts with msg.sender then , 
     // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] nodes, address[] tokens, uint wad) {
-        var length = tokens.length;
 
-        uint currentToken = 0;
+        uint tokenIndex = 0;
 
         address currentValidator;
 
-        for (var x = 0; x < length; x++) {
+        address prevNode;
+
+        for (var x = 0; x < nodes.length; x++) {
             
             var node = nodes[x];
 
-            var token = CirclesToken(tokens[currentToken]);
-
-            address prevNode;
+            var token = CirclesToken(tokens[tokenIndex]);
 
             if (currentValidator != 0) {
                 prevNode = currentValidator;
@@ -71,8 +70,9 @@ contract CirclesHub is DSMath {
             // edges[node][prevNode] 
             assert(edges[node][prevNode].lastTouched != 0);
 
-            edges[node][prevNode].value = time() - edges[node][prevNode].lastTouched < LIMIT_EPOCH ? 
-                edges[node][prevNode].value + wad : wad;
+            edges[node][prevNode].value = time() - edges[node][prevNode].lastTouched < LIMIT_EPOCH
+                ? edges[node][prevNode].value + wad
+                : wad;
 
             edges[node][prevNode].lastTouched = time();
             
@@ -81,18 +81,16 @@ contract CirclesHub is DSMath {
             if (validators[node]) {
                 currentValidator = node;
             } else {
-                currentToken++;
-
+                
                 token.transferFrom(msg.sender, node, wad);
 
-                if (x + 1 < length) {
+                if (tokenIndex + 1 < tokens.length) {
 
-                    var nextToken = CirclesToken(tokens[currentToken]);
+                    var nextToken = CirclesToken(tokens[tokenIndex + 1]);
                     nextToken.transferFrom(node, msg.sender, wad);
                 }
-            }
-            
+                tokenIndex++;
+            } 
         }
     }
-
 }
