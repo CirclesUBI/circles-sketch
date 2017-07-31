@@ -36,7 +36,7 @@ contract CirclesHub is DSMath {
         isValidator[msg.sender] = true;
     }
 
-    // Trust does not have to be reciprocated. 
+    // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
     function trust(address node, bool yes, uint limit) {
         assert(address(tokenToUser[node]) != 0 || isValidator[node]);
@@ -44,53 +44,61 @@ contract CirclesHub is DSMath {
 
     }
 
-    // Starts with msg.sender then , 
+    // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
     function transferThrough(address[] nodes, address[] tokens, uint wad) {
 
         uint tokenIndex = 0;
 
-        address currentValidator;
+        address prevValidator;
 
         address prevNode;
 
         for (var x = 0; x < nodes.length; x++) {
-            
-            var node = nodes[x];
 
+            var node = nodes[x];
+            // Cast token to a CirclesToken at tokenIndex
             var token = CirclesToken(tokens[tokenIndex]);
 
-            if (currentValidator != 0) {
-                prevNode = currentValidator;
-                currentValidator = 0;
+            // If there exist a previous validator
+            if (prevValidator != 0) {
+                prevNode = prevValidator;
+                prevValidator = 0;
             }
             else {
                 prevNode = token;
             }
-            // edges[node][prevNode] 
+            // edges[node][prevNode]
+            // assert that a valid trust relationship exists
             assert(edges[node][prevNode].lastTouched != 0);
 
+            // If the last time the relationship was touched is less than the limit epoch
+            // add the current value of the edge to the transaction value and update the current value
             edges[node][prevNode].value = time() - edges[node][prevNode].lastTouched < LIMIT_EPOCH
                 ? edges[node][prevNode].value + wad
                 : wad;
 
+            // update lastTOuched to reflect this transaction
             edges[node][prevNode].lastTouched = time();
-            
+
+            // assert that the limit is greater than the proposed value
             assert(edges[node][prevNode].limit >= edges[node][prevNode].value);
 
             if (isValidator[node]) {
-                currentValidator = node;
+                prevValidator = node;
             } else {
-                
+                // Transfer the current token from the msg.sender to the current node
                 token.transferFrom(msg.sender, node, wad);
 
+                // If this is not the last token in the list transfer the nextToken
+                // from the current node to the msg.sender
                 if (tokenIndex + 1 < tokens.length) {
 
                     var nextToken = CirclesToken(tokens[tokenIndex + 1]);
                     nextToken.transferFrom(node, msg.sender, wad);
                 }
                 tokenIndex++;
-            } 
+            }
         }
     }
 }
