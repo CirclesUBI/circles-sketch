@@ -4,8 +4,9 @@ import "./CirclesToken.sol";
 
 import "ds-token/token.sol";
 import "ds-math/math.sol";
+import "ds-note/note.sol";
 
-contract CirclesHub is DSMath {
+contract CirclesHub is DSNote, DSMath {
 
     uint constant LIMIT_EPOCH = 3600;
 
@@ -25,20 +26,20 @@ contract CirclesHub is DSMath {
     function time() returns (uint) { return block.timestamp; }
 
     // No exit allowed. Once you create a personal token, you're in for good.
-    function join() {
+    function join() note {
         assert(address(userToToken[msg.sender]) == 0);
         var token = new CirclesToken(msg.sender);
         userToToken[msg.sender] = token;
         tokenToUser[address(token)] = msg.sender;
     }
 
-    function register() {
+    function register() note {
         isValidator[msg.sender] = true;
     }
 
     // Trust does not have to be reciprocated.
     // (e.g. I can trust you but you don't have to trust me)
-    function trust(address node, bool yes, uint limit) {
+    function trust(address node, bool yes, uint limit) note {
         assert(address(tokenToUser[node]) != 0 || isValidator[node]);
         edges[msg.sender][node] = yes ? EdgeWeight(limit, 0, time()) : EdgeWeight(0, 0, 0);
 
@@ -46,7 +47,7 @@ contract CirclesHub is DSMath {
 
     // Starts with msg.sender then ,
     // iterates through the nodes list swapping the nth token for the n+1 token
-    function transferThrough(address[] nodes, address[] tokens, uint wad) {
+    function transferThrough(address[] nodes, address[] tokens, uint wad) note {
 
         uint tokenIndex = 0;
 
