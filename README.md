@@ -1,5 +1,8 @@
 # circles-sketch
 
+
+**Note, this version of the contracts is no longer under active development, please see [this repo](https://github.com/CirclesUBI/circles-contracts) for our more current work**
+
 This is a [Dappsys](http://dappsys.info)-driven example implementation for the Circles universal basic income platform. It was created with the [dapp](https://dapp.readthedocs.io/en/latest/) development tool, which is required to run the test cases.
 
 **Note:** This is only a sample implementation. It is not intended for deployment in a production system.
